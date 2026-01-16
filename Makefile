@@ -4,7 +4,7 @@
 #
 #	Author: Wesley Campbell
 #	Date: 	2026-01-16
-#	Version: 1.0
+#	Version: 1.0.1
 #
 #	Part of the lightTrackingRobot project
 # ---------------------------------------------------------
@@ -35,6 +35,7 @@ all: $(TARGET)
 
 $(TARGET): $(SRC_FILES) 
 	@echo "Beginning compile process..."
+	@mkdir -p $(BUILD_DIR)
 	$(ARDUINO) compile \
 		--fqbn $(BOARD_FQBN) \
 		--port $(PORT) \
