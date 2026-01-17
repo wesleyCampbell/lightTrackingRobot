@@ -20,8 +20,8 @@ actionStateStruct actionStates;
 // ========================== DETECTION STATE FUNCTIONS =============================
 
 float readPinVoltage(uint8_t pin) {
-	// return VOLTAGE_MAX * (float) analogRead(pin) / SENSOR_MAX_OUT;
-	return pin * 3.141;
+	// Maps the reading of the analog pin to the voltage scale
+	return VOLTAGE_MAX * (float) analogRead(pin) / SENSOR_MAX_OUT;
 }
 
 bool buttonPushed(uint8_t button_pin) {
@@ -90,6 +90,5 @@ void activateLED(uint8_t ledPin) {
 }
 
 void disableLED(uint8_t ledPin) {
-	// TODO: Implemnt this
 	digitalWrite(ledPin, LOW);
 }
