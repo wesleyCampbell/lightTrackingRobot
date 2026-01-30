@@ -4,11 +4,11 @@
  *
  * Initializes all process and hardware requred for robot function.
  *
- * Part of the lightTrackingRobot project.
+ * This file is part of the lightTrackingRobot project for the BYU ECEN240 course.
  *
  * @author 	Wesley Campbell
  * @date 	2026-01-16
- * @version	v1.0.0
+ * @version	v1.0.1
  */
 
 #include "init.h"
@@ -30,6 +30,7 @@ void initPins() {
 	pinMode(LED_BUILTIN, OUTPUT);
 }
 
-void initSerialCommunication() {
-
+void initSerialComm() {
+	// Primary serial port
+	Serial.begin(9600);  
 }

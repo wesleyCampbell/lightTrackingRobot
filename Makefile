@@ -4,7 +4,7 @@
 #
 #	Author: Wesley Campbell
 #	Date: 	2026-01-16
-#	Version: 1.0.1
+#	Version: 1.0.2
 #
 #	Part of the lightTrackingRobot project
 # ---------------------------------------------------------
@@ -52,7 +52,16 @@ upload: all
 		--input-dir $(BUILD_DIR)
 	@echo "Upload successfull"
 
+clangd:
+	@echo "Generating Clangd database..."
+	$(ARDUINO) compile \
+		--fqbn $(BOARD_FQBN) \
+		--build-path ./$(BUILD_DIR) \
+		--build-property "build.extra_flags=$(CFLAGS)" \
+		--only-compilation-database \
+		$(PWD)
+
 clean:
 	@echo "Cleaning build artifacts..."
-	@rm -rf $(BUILD_DIR)/* $(TARGET)
+	@find build -mindepth 1 -maxdepth 1 ! -name 'venv' ! -name 'compile_commands.json' -exec rm -rf {} +
 	@echo "Finished cleaning"

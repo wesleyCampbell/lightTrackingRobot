@@ -6,11 +6,11 @@
  * functionality of the robot. This includes pin definitions, definitions of robot states, 
  * voltage thresholds, etc.
  *
- * This file is part of the lightTrackingRobot project for BYU ECEN240.
+ * This file is part of the lightTrackingRobot project for the BYU ECEN240 course.
  *
  * @author	Wesley Campbell
  * @date	2026-01-15	
- * @version	v1.0.0
+ * @version	v1.0.1
  **/
 
 //======================== PIN DECLARATIONS ===============================
@@ -20,17 +20,17 @@
 
 // Button input pins
 #define BUTTON_SERVO_UP    A2
-#define BUTTON_SERVO_DOWN  A6
+#define BUTTON_SERVO_DOWN  A5
 #define BUTTON_MOTOR_LEFT  A3
-#define BUTTON_MOTOR_RIGHT A5
+#define BUTTON_MOTOR_RIGHT A6
 #define BUTTON_COLLISION   A4
 
 // LED output pins
 #define LED_SERVO_UP	6
-#define LED_SERVO_DOWN	2
-#define LED_MOTOR_LEFT	5
+#define LED_SERVO_DOWN	4
+#define LED_MOTOR_LEFT	2
 #define LED_MOTOR_RIGHT	3
-#define LED_COLLISION	4
+#define LED_COLLISION	5
 
 // Motor output pins
 // TODO: implement motors
@@ -50,7 +50,7 @@
 // ======================= SAMPLING PARAMETERS =============================
 
 // The voltage threshold at which a button is pressed
-#define BUTTON_VTHRESHOLD 2.5
+#define BUTTON_VTHRESHOLD 3.5 
 
 #define VOLTAGE_MAX 5
 #define SENSOR_MAX_OUT 1024

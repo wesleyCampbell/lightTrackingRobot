@@ -4,7 +4,7 @@
 
 - Author: Wesley Campbell
 - Date: 2026-01-16
-- Version: v1.0.1
+- Version: v1.0.2
 
 ---
 
@@ -41,3 +41,10 @@ A circuit diagram will be provided below further along the development cycle.
 - Wrote Makefile
 - Wrote boilerplate infrastructure for robot state machine
 - Implemented basic version of collision detection
+
+##### (2026-01-29) -- v1.0.1:
+- Finished robot state machines.
+- Finalized pin outs
+- Polished and refined code out
+- Added robot initialization protocols
+

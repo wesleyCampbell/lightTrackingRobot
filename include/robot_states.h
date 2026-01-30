@@ -11,17 +11,18 @@
  * Each of these states will have its own actions and logical flows, which are 
  * defined in this file
  *
- * This file is part of the lightTrackingRobot project for BYU ECEN240.
+ * This file is part of the lightTrackingRobot project for the BYU ECEN240 project.
  *
  * @author	Wesley Campbell
  * @date	2026-01-15
- * @version v1.0.0
+ * @version v1.0.1
  **/
 
 #ifndef __ROBOT_STATES_H__
 #define __ROBOT_STATES_H__
 
 #include "includes.h"
+#include <stdint.h>
 
 //========================== STATE DEFINITIONS =====================================
 
@@ -30,23 +31,27 @@
 #define DETECTION_TRUE 	1
 
 // Collision Phases
-#define COLLISION_ACTIVE	0
-#define COLLISION_INACTIVE 	1
+#define COLLISION_ACTIVE	1
+#define COLLISION_INACTIVE 	0
 
 // Driving Phases
-#define DRIVE_STOP		0
-#define DRIVE_LEFT		1
-#define DRIVE_RIGHT		2
-#define DRIVE_STRAIGHT	3
+#define DRIVE_STOP      0x00
+#define DRIVE_LEFT      0x01
+#define DRIVE_RIGHT     0x10
+#define DRIVE_STRAIGHT  0x11
 
 // Servo Movement Phases
-#define SERVO_MOVE_STOP   0
-#define SERVO_MOVE_UP	  1
-#define SERVO_MOVE_DOWN   2
+#define SERVO_MOVE_STOP   0x00
+#define SERVO_MOVE_UP	  0x01
+#define SERVO_MOVE_DOWN   0x10
+#define SERVO_MOVE_UP_DOWN  (SERVO_MOVE_UP | SERVO_MOVE_DOWN)
 
 
 // ========================== STATE TRACKING VARIABLES ===============================
 
+/*
+ * @brief Struct used for storing robot data
+ */
 typedef struct _detectionDataStruct {
 	struct {
 		uint8_t right;
@@ -58,6 +63,9 @@ typedef struct _detectionDataStruct {
 	uint8_t capacitiveTouchDetected;
 } detectionDataStruct;
 
+/*
+ * @brief Struct used for storing robot action states
+ */
 typedef struct _actionStateStruct {
 	uint8_t Collision;
 	uint8_t Drive;
@@ -181,7 +189,18 @@ void RobotAction();
 /**
  * @brief	Handles collision execution logic
  *
- * If the collision flag is set, this function will stop the robot's motors.
+ * Sets the collision LED.
+ * 
+ * @return status code if collision detected, 0 otherwise.
+ */
+void handleDriveAction();
+
+/**
+ * @brief	Handles collision execution logic
+ *
+ * Sets the collision LED.
+ * 
+ * @return status code if collision detected, 0 otherwise.
  */
 void handleCollisionAction();
 
@@ -190,7 +209,7 @@ void handleCollisionAction();
  *
  * Will move the servo motor up or down, based upon the condition flags set.
  */
-void moveServo();
+void handleServoAction();
 
 /**
  * @brief	Will control the motors to drive in desired direction
