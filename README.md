@@ -16,8 +16,10 @@ photo-diodes. The robot has several different states that define its function at
 
 ## Dependancies
 
-To compile and use the code, one must have the `arduino-cli` command installed, as that is the 
+To compile and use the base robot code, one must have the `arduino-cli` command installed, as that is the 
 tool used to compile the project.
+
+To use the python serial communication script to graphically display data, the `PySerial`, `PyQt6`, and `matplotlib` python libraries are required.
 
 ## Usage
 

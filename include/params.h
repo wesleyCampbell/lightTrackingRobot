@@ -27,10 +27,10 @@
 
 // LED output pins
 #define LED_SERVO_UP	6
-#define LED_SERVO_DOWN	4
+#define LED_SERVO_DOWN	5
 #define LED_MOTOR_LEFT	2
-#define LED_MOTOR_RIGHT	3
-#define LED_COLLISION	5
+#define LED_MOTOR_RIGHT	4
+#define LED_COLLISION	3
 
 // Motor output pins
 // TODO: implement motors
