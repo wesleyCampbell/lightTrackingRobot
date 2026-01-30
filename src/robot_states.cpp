@@ -146,8 +146,6 @@ void RobotPlanning() {
 	fsmCollisionDetection();
 	fsmTempLightDetection();
 	fsmServoMovement();
-
-	printRobotState(&detectedData, &actionStates);
 }
 
 // ================================ ACTION STATE FUNCTIONS ======================================
@@ -159,6 +157,8 @@ void RobotAction() {
 	handleDriveAction();
 
 	handleServoAction();
+
+	printRobotState(&detectedData, &actionStates);
 }	
 
 void handleDriveAction() {
