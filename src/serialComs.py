@@ -54,14 +54,18 @@ SERVO_STATES = {
 
 ACTIONS_LEN = len(ACTIONS)
 
+PIN_VOLTAGE_MAX = 5
+
 GRAPH_WINDOW = 200
 
-DATA_PACKET_HEADER = 0xF1
-ACTION_PACKET_HEADER = 0xF2
+DATA_PACKET_HEADER = 0xAA
+ACTION_PACKET_HEADER = 0xBB
+PIN_DATA_PACKET_HEADER = 0xCC
 
 HEADERS = {
         DATA_PACKET_HEADER: 3,
-        ACTION_PACKET_HEADER: 3
+        ACTION_PACKET_HEADER: 3,
+        PIN_DATA_PACKET_HEADER: 3
         }
 
 PLOT_INTERVAL = 0.05
@@ -117,39 +121,46 @@ def unpack_light_data(byte):
 
 ###################################################################3
 
-def _init_data_plot(fig, ax_data):
+def _init_data_plot(fig, ax):
     for i in range(SENSORS_LEN):
-        line, = ax_data.plot([], [], drawstyle='steps-post')
+        line, = ax.plot([], [], drawstyle='steps-post')
         lines_data.append(line)
 
-    ax_data.set_ylim(-1, SENSORS_LEN)
-    ax_data.set_xlim(0, GRAPH_WINDOW)
-    ax_data.set_yticks(range(SENSORS_LEN))
-    ax_data.set_yticklabels([sensor for sensor in SENSORS])
+    ax.set_ylim(-1, SENSORS_LEN)
+    ax.set_xlim(0, GRAPH_WINDOW)
+    ax.set_yticks(range(SENSORS_LEN))
+    ax.set_yticklabels([sensor for sensor in SENSORS])
 
-def _init_action_plot(fig, ax_action):
+def _init_action_plot(fig, ax):
     for i in range(ACTIONS_LEN):
-        line, = ax_action.plot([], [], drawstyle='steps-post')
+        line, = ax.plot([], [], drawstyle='steps-post')
         lines_actions.append(line)
 
-    ax_action.set_ylim(-1, ACTIONS_LEN)
-    ax_action.set_xlim(0, GRAPH_WINDOW)
-    ax_action.set_yticks(range(ACTIONS_LEN))
-    ax_action.set_yticklabels([action for action in ACTIONS])
+    ax.set_ylim(-1, ACTIONS_LEN)
+    ax.set_xlim(0, GRAPH_WINDOW)
+    ax.set_yticks(range(ACTIONS_LEN))
+    ax.set_yticklabels([action for action in ACTIONS])
+
+def _init_pin_plot(fig, ax):
+    ax.set_ylim(-1, PIN_VOLTAGE_MAX)
+    ax.set_xlim(0, GRAPH_WINDOW)
+    ax.set_yticks(1)
+    ax.set_yticklabels(range(1, 6));
 
 def init_plot():
     plt.ion()
-    fig, (ax_data, ax_actions) = plt.subplots(
+    fig, (ax_data, ax_actions, ax_pin) = plt.subplots(
                 nrows=1,
-                ncols=2,
+                ncols=3,
                 sharex=True,
                 figsize=(12,8)
             )
 
     _init_data_plot(fig, ax_data)
     _init_action_plot(fig, ax_actions)
+    _init_pin_plot(fig, ax_pin)
 
-    return fig, (ax_data, ax_actions) 
+    return fig, (ax_data, ax_actions, ax_pin) 
 
 def _update_data_plot():
     for i, buf in enumerate(buffers_data):

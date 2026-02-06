@@ -159,6 +159,7 @@ void RobotAction() {
 	handleServoAction();
 
 	printRobotState(&detectedData, &actionStates);
+	sendPinData(readPinVoltage(BUTTON_SERVO_DOWN));
 }	
 
 void handleDriveAction() {

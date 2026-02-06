@@ -10,6 +10,7 @@
  * @version 1.0.1
  */
 
+#include "communicate.h"
 #include "includes.h"
 
 void println(char* msg) {
@@ -25,22 +26,32 @@ void debug(char* msg) {
 	print(msg);
 }
 
-struct dataBlob* newSensorDataBlob() {
-	struct dataBlob* outBlob = (struct dataBlob*)malloc(sizeof(struct dataBlob));
+void initializeBlob(struct dataBlob* blob, uint8_t header) {
+	blob->dataBlob = 0;
+	blob->dataUsed = 0;
+	blob->header = header;
+}
 
-	outBlob->dataBlob = 0;
-	outBlob->dataUsed = 0;
-	outBlob->header = SENSOR_DATA_BLOB_HEADER;
+struct dataBlob* newSensorDataBlob() {
+	struct dataBlob* outBlob = NEW_DATA_BLOB();
+
+	initializeBlob(outBlob, SENSOR_DATA_BLOB_HEADER);
 
 	return outBlob;
 }
 
 struct dataBlob* newActionDataBlob() {
-	struct dataBlob* outBlob = (struct dataBlob*)malloc(sizeof(struct dataBlob));
+	struct dataBlob* outBlob = NEW_DATA_BLOB();
 
-	outBlob->dataBlob = 0;
-	outBlob->dataUsed = 0;
-	outBlob->header = ACTION_DATA_BLOB_HEADER;
+	initializeBlob(outBlob, ACTION_DATA_BLOB_HEADER);
+
+	return outBlob;
+}
+
+struct dataBlob* newPinDataBlob() {
+	struct dataBlob* outBlob = NEW_DATA_BLOB();
+
+	initializeBlob(outBlob, PIN_DATA_BLOB_HEADER);
 
 	return outBlob;
 }
@@ -63,6 +74,19 @@ COMM_STATUS dataMarshall_uint8(struct dataBlob* dataBlob, uint8_t data) {
 	return COMM_STATUS_OK;
 }
 
+COMM_STATUS dataMarshall_uint16(struct dataBlob* dataBlob, uint16_t data) {
+	COMM_STATUS status;
+
+	status = dataMarshall_uint8(dataBlob, (uint8_t)data);
+	// If something went wrong, just bail
+	if (status != COMM_STATUS_OK) {
+		return status;
+	}
+	status = dataMarshall_uint8(dataBlob, (uint8_t) (data >> 8));
+
+	return status;
+}
+
 COMM_STATUS sendMarshalledData(struct dataBlob* dataBlob) {
 	Serial.write(dataBlob->header);
 
@@ -71,6 +95,7 @@ COMM_STATUS sendMarshalledData(struct dataBlob* dataBlob) {
 		Serial.write(payload);
 	}
 }
+
 
 uint8_t marshallLightData(detectionDataStruct* data) {
 	uint8_t outData = 0;
@@ -81,6 +106,18 @@ uint8_t marshallLightData(detectionDataStruct* data) {
 	outData |= (data->lightDetected.up << 3);
 
 	return outData;
+}
+
+COMM_STATUS sendPinData(uint8_t pin, uint16_t data) {
+	struct dataBlob* dataBlob = newPinDataBlob();
+
+	dataMarshall_uint8(dataBlob, pin);
+	dataMarshall_uint16(dataBlob, data);
+
+	sendMarshalledData(dataBlob);
+
+	free(dataBlob);
+	
 }
 
 void printRobotData(detectionDataStruct* data) {

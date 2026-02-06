@@ -17,8 +17,9 @@
 #include "includes.h"
 #include "robot_states.h"
 
-#define SENSOR_DATA_BLOB_HEADER 0xF1
-#define ACTION_DATA_BLOB_HEADER 0xF2
+#define SENSOR_DATA_BLOB_HEADER 0xAA
+#define ACTION_DATA_BLOB_HEADER 0xBB
+#define PIN_DATA_BLOB_HEADER 0xCC
 
 #define DATA_BLOB_DATA_TYPE uint64_t
 #define DATA_BLOB_DATA_SIZE (sizeof(DATA_BLOB_DATA_TYPE))
@@ -27,6 +28,9 @@
 #define COMM_STATUS_OK 0
 #define COMM_STATUS_FAIL 1
 #define STATUS_DATA_BLOB_FILLED 2
+
+#define NEW_DATA_BLOB() (struct dataBlob*)malloc(sizeof(struct dataBlob))
+
 
 /*
  * @brief A structure used to form binary large objects
@@ -42,7 +46,28 @@ struct dataBlob {
  *
  * @return dataBlob*. Must free when done
  */
+void initializeBlob(struct dataBlob* blob);
+
+/*
+ * @brief Creates a new, empty dataBlob
+ *
+ * @return dataBlob*. Must free when done
+ */
+struct dataBlob* newActionDataBlob();
+
+/*
+ * @brief Creates a new, empty dataBlob
+ *
+ * @return dataBlob*. Must free when done
+ */
 struct dataBlob* newSensorDataBlob();
+
+/*
+ * @brief Creates a new, empty dataBlob
+ *
+ * @return dataBlob*. Must free when done
+ */
+struct dataBlob* newPinDataBlob();
 
 /*
  * @brief Marshalls a byte of data into the next open position in a dataBlob object
@@ -55,6 +80,16 @@ struct dataBlob* newSensorDataBlob();
 COMM_STATUS dataMarshall_uint8(struct dataBlob* dataBlob, uint8_t data);
 
 /*
+ * @brief Marshalls two bytes of data into the next open position in a dataBlob object
+ *
+ * @param dataBlob A pointer to the dataBlob
+ * @param data The byte of data
+ *
+ * @return A status code indicating success or failure
+ */
+COMM_STATUS dataMarshall_uint16(struct dataBlob* dataBlob, uint8_t data);
+
+/*
  * @brief Sends marshelled data held within a dataBlob object
  *
  * @param dataBlob* A pointer to the dataBlob
@@ -62,6 +97,16 @@ COMM_STATUS dataMarshall_uint8(struct dataBlob* dataBlob, uint8_t data);
  * @return A status code indicating success or failure
  */
 COMM_STATUS sendMarshalledData(struct dataBlob* dataBlob);
+
+/**
+ * @brief Marshalls analogPin data and sends it down the wire.
+ *
+ * @param pin The pin being read
+ * @param data The data to send over the wire
+ *
+ * @return Status code indicating success or failure.
+ */
+COMM_STATUS sendPinData(uint8_t pin, uint16_t data);
 
 /*
  * @brief a shorter version of Serial.println.
