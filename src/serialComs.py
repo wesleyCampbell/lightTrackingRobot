@@ -11,7 +11,7 @@ Part of the lightTrackingRobot project.
 
 @author Wesley Campbell
 @date   2026-01-29
-@version 1.0.0
+@version 1.0.1
 """
 
 import serial
@@ -84,6 +84,9 @@ buffers_data = [deque(maxlen=GRAPH_WINDOW) for _ in range(SENSORS_LEN)]
 lines_actions = []
 buffers_actions = [deque(maxlen=GRAPH_WINDOW) for _ in range(ACTIONS_LEN)]
 
+lines_pins = {}
+buffers_pin_data = {}
+
 ###################################################################3
 
 #                        DATA READ METHODS
@@ -114,6 +117,64 @@ def read_packet(serialPort):
 def unpack_light_data(byte):
     return [(byte >> i) & 1 for i in range(4)]
 
+def parseDriveData(driveData):
+    return [driveData & DRIVE_STATES['left'] != 0, 
+            driveData & DRIVE_STATES['right'] != 0]
+
+def parseServoData(servoData):
+    return [servoData & SERVO_STATES['down'] != 0,
+            servoData & SERVO_STATES['up'] != 0]
+
+def parsePinVoltageData(pinData):
+    voltage = pinData[1] << 8
+    voltage |= pinData[0]
+    return voltage
+
+def readPayload(serialPort, ax):
+    def handleDrivePacket(payload):
+        lightData = unpack_light_data(payload[0])
+
+        data = lightData[0:2] + [payload[1]] + lightData[2:4] + [payload[2]]
+
+        print(f"DATA: {data}")
+        update_data(data)
+
+    def handleActionPacket(payload):
+        collision = payload[0]
+        drive = parseDriveData(payload[1])
+        servo = parseServoData(payload[2])
+
+        # actions = collision + drive + servo
+        actions = list([servo[0], drive[0], collision, drive[1], servo[1]])
+
+        print(f"ACTIONS: {actions}")
+
+        update_actions(actions)
+
+    def handlePinPacket(payload):
+        pinNumber = payload[0]
+        voltage = parsePinVoltageData(payload[1:])
+
+        if pinNumber not in buffers_pin_data.keys():
+            buffers_pin_data[pinNumber] = ax[2].plot([], [])
+
+        update_pin_data(pinNumber, voltage)
+
+    ### Read the packet
+
+    reading = read_packet(serialPort)
+
+    if not reading:
+        return None
+    
+    header, payload = reading
+
+    if (header == DATA_PACKET_HEADER):
+        handleDrivePacket(payload)
+    elif (header == ACTION_PACKET_HEADER):
+        handleActionPacket(payload)
+    elif (header == PIN_DATA_PACKET_HEADER):
+        handlePinPacket(payload)
 
 ###################################################################3
 
@@ -142,6 +203,8 @@ def _init_action_plot(fig, ax):
     ax.set_yticklabels([action for action in ACTIONS])
 
 def _init_pin_plot(fig, ax):
+    # lines_pins.append(ax.plot([], []))
+
     ax.set_ylim(-1, PIN_VOLTAGE_MAX)
     ax.set_xlim(0, GRAPH_WINDOW)
     ax.set_yticks(1)
@@ -172,12 +235,18 @@ def _update_action_plot():
         y = [val + i for val in buf]
         lines_actions[i].set_data(range(len(y)), y)
 
+def _update_pin_data_plot():
+    for pin in buffers_pin_data.keys():
+        y = [val for val in buffers_pin_data[key]]
+        lines_pins[pin].set_data(range(len(y)), y)
+
 def update_plot():
     # for i, buf in enumerate(buffers):
     #     y = [v + i for v in buf]
     #     lines[i].set_data(range(len(y)), y)
     _update_data_plot()
     _update_action_plot()
+    _update_pin_data_plot()
 
     plt.draw()  
     plt.pause(0.01)
@@ -190,6 +259,9 @@ def update_actions(action):
     for i, bit in enumerate(action):
         buffers_actions[i].append(bit * GRAPH_AMPLITUDE)
 
+def update_pin_data(pinNum, data):
+    buffers_pin_data[pinData].append(data)
+
 ###################################################################3
 
 #                        MAIN
@@ -199,42 +271,6 @@ def update_actions(action):
 def shutdown(serialPort):
     serialPort.close()
     plt.close("all")
-
-def parseDriveData(driveData):
-    return [driveData & DRIVE_STATES['left'] != 0, 
-            driveData & DRIVE_STATES['right'] != 0]
-
-def parseServoData(servoData):
-    return [servoData & SERVO_STATES['down'] != 0,
-            servoData & SERVO_STATES['up'] != 0]
-
-def readPayload(serialPort):
-    reading = read_packet(serialPort)
-
-    if not reading:
-        return None
-    
-    header, payload = reading
-
-    if (header == DATA_PACKET_HEADER):
-        lightData = unpack_light_data(payload[0])
-
-        data = lightData[0:2] + [payload[1]] + lightData[2:4] + [payload[2]]
-
-        print(f"DATA: {data}")
-        update_data(data)
-    elif (header == ACTION_PACKET_HEADER):
-        collision = payload[0]
-        drive = parseDriveData(payload[1])
-        servo = parseServoData(payload[2])
-
-        # actions = collision + drive + servo
-        actions = list([servo[0], drive[0], collision, drive[1], servo[1]])
-
-        print(f"ACTIONS: {actions}")
-
-        update_actions(actions)
-
 
 if __name__ == "__main__":
     running = True
@@ -268,5 +304,6 @@ if __name__ == "__main__":
             running = False
 
     shutdown(ser)
+
 
 
