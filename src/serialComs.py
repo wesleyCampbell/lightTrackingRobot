@@ -156,7 +156,9 @@ def readPayload(serialPort, ax):
         voltage = parsePinVoltageData(payload[1:])
 
         if pinNumber not in buffers_pin_data.keys():
-            buffers_pin_data[pinNumber] = ax[2].plot([], [])
+            # buffers_pin_data[pinNumber] = ax[2].plot([], [])
+            buffers_pin_data[pinNumber] = deque(maxlen=GRAPH_WINDOW)
+            lines_pins[pinNumber] = ax[2].plot([], [])
 
         update_pin_data(pinNumber, voltage)
 
