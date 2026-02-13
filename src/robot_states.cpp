@@ -159,7 +159,12 @@ void RobotAction() {
 	handleServoAction();
 
 	printRobotState(&detectedData, &actionStates);
-	sendPinData(readPinVoltage(BUTTON_SERVO_DOWN));
+
+	sendPinData(BUTTON_SERVO_DOWN, readPinVoltage(BUTTON_SERVO_DOWN));
+	sendPinData(BUTTON_SERVO_UP, readPinVoltage(BUTTON_SERVO_UP));
+	// sendPinData(BUTTON_MOTOR_LEFT, readPinVoltage(BUTTON_MOTOR_LEFT));
+	// sendPinData(BUTTON_MOTOR_RIGHT, readPinVoltage(BUTTON_MOTOR_RIGHT));
+	sendPinData(BUTTON_COLLISION, readPinVoltage(BUTTON_COLLISION));
 }	
 
 void handleDriveAction() {

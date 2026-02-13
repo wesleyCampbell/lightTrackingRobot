@@ -83,11 +83,21 @@ COMM_STATUS dataMarshall_uint8(struct dataBlob* dataBlob, uint8_t data);
  * @brief Marshalls two bytes of data into the next open position in a dataBlob object
  *
  * @param dataBlob A pointer to the dataBlob
- * @param data The byte of data
+ * @param data The two bytes of data
  *
  * @return A status code indicating success or failure
  */
 COMM_STATUS dataMarshall_uint16(struct dataBlob* dataBlob, uint8_t data);
+
+/*
+ * @brief Marshalls a four-bit float value into the next open position in a dataBlob object
+ *
+ * @param dataBlob A pointer to the dataBlob
+ * @param data The float to marshall
+ *
+ * @return A status code indicating success or failure
+ */
+COMM_STATUS dataMarshall_float(struct dataBlob* dataBlob, float data);
 
 /*
  * @brief Sends marshelled data held within a dataBlob object
@@ -106,7 +116,7 @@ COMM_STATUS sendMarshalledData(struct dataBlob* dataBlob);
  *
  * @return Status code indicating success or failure.
  */
-COMM_STATUS sendPinData(uint8_t pin, uint16_t data);
+COMM_STATUS sendPinData(uint8_t pin, float data);
 
 /*
  * @brief a shorter version of Serial.println.

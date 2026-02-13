@@ -15,11 +15,13 @@ Part of the lightTrackingRobot project.
 """
 
 import serial
+import struct
 
 from collections import deque
 import matplotlib
 matplotlib.use("QtAgg")
 import matplotlib.pyplot as plt
+from matplotlib.ticker import MultipleLocator
 
 import time
 
@@ -57,6 +59,7 @@ ACTIONS_LEN = len(ACTIONS)
 PIN_VOLTAGE_MAX = 5
 
 GRAPH_WINDOW = 200
+X_AXIS = list(range(GRAPH_WINDOW))
 
 DATA_PACKET_HEADER = 0xAA
 ACTION_PACKET_HEADER = 0xBB
@@ -65,10 +68,10 @@ PIN_DATA_PACKET_HEADER = 0xCC
 HEADERS = {
         DATA_PACKET_HEADER: 3,
         ACTION_PACKET_HEADER: 3,
-        PIN_DATA_PACKET_HEADER: 3
+        PIN_DATA_PACKET_HEADER: 5
         }
 
-PLOT_INTERVAL = 0.05
+PLOT_INTERVAL = 0.09
 
 GRAPH_AMPLITUDE = 0.4
 
@@ -94,25 +97,26 @@ buffers_pin_data = {}
 ###################################################################3
 
 def read_packet(serialPort):
-    header = ser.read(1)
 
-    # If there is no packet, break off
-    if not header:
+    header = 0
+    while True:
+        byte = serialPort.read(1)
+
+        if not byte:
+            continue
+
+        header = byte[0]
+
+        if header in HEADERS.keys():
+            break
+
+    packet_size = HEADERS[header]
+    payload = serialPort.read(packet_size)
+
+    if len(payload) != packet_size:
         return None
 
-    header = header[0]
-
-    try:
-        packet_size = HEADERS[header]
-        payload = ser.read(packet_size)
-
-        # if payload is corrupted
-        if not payload or len(payload) != packet_size:
-            return None
-
-        return (header, payload)
-    except KeyError:
-        return None
+    return (header, payload)
 
 def unpack_light_data(byte):
     return [(byte >> i) & 1 for i in range(4)]
@@ -126,8 +130,10 @@ def parseServoData(servoData):
             servoData & SERVO_STATES['up'] != 0]
 
 def parsePinVoltageData(pinData):
-    voltage = pinData[1] << 8
-    voltage |= pinData[0]
+    # voltage = pinData[1] << 8
+    # voltage |= pinData[0]
+    # return voltage
+    voltage = struct.unpack('<f', pinData)
     return voltage
 
 def readPayload(serialPort, ax):
@@ -136,7 +142,6 @@ def readPayload(serialPort, ax):
 
         data = lightData[0:2] + [payload[1]] + lightData[2:4] + [payload[2]]
 
-        print(f"DATA: {data}")
         update_data(data)
 
     def handleActionPacket(payload):
@@ -147,20 +152,21 @@ def readPayload(serialPort, ax):
         # actions = collision + drive + servo
         actions = list([servo[0], drive[0], collision, drive[1], servo[1]])
 
-        print(f"ACTIONS: {actions}")
-
         update_actions(actions)
 
     def handlePinPacket(payload):
         pinNumber = payload[0]
-        voltage = parsePinVoltageData(payload[1:])
+        voltage = parsePinVoltageData(payload[1:5])
 
         if pinNumber not in buffers_pin_data.keys():
             # buffers_pin_data[pinNumber] = ax[2].plot([], [])
             buffers_pin_data[pinNumber] = deque(maxlen=GRAPH_WINDOW)
-            lines_pins[pinNumber] = ax[2].plot([], [])
+
+            line, = ax[2].plot([], [], label=f"Pin {pinNumber}")
+            lines_pins[pinNumber] = line
 
         update_pin_data(pinNumber, voltage)
+        ax[2].legend()
 
     ### Read the packet
 
@@ -194,6 +200,9 @@ def _init_data_plot(fig, ax):
     ax.set_yticks(range(SENSORS_LEN))
     ax.set_yticklabels([sensor for sensor in SENSORS])
 
+    ax.set_ylabel("Data")
+    ax.set_title("Robot Sensor Data")
+
 def _init_action_plot(fig, ax):
     for i in range(ACTIONS_LEN):
         line, = ax.plot([], [], drawstyle='steps-post')
@@ -204,13 +213,23 @@ def _init_action_plot(fig, ax):
     ax.set_yticks(range(ACTIONS_LEN))
     ax.set_yticklabels([action for action in ACTIONS])
 
+    ax.set_title("Robot States")
+    ax.set_xlabel("Time")
+
 def _init_pin_plot(fig, ax):
     # lines_pins.append(ax.plot([], []))
 
-    ax.set_ylim(-1, PIN_VOLTAGE_MAX)
+    ax.set_ylim(-0.125, PIN_VOLTAGE_MAX + 1)
     ax.set_xlim(0, GRAPH_WINDOW)
-    ax.set_yticks(1)
-    ax.set_yticklabels(range(1, 6));
+
+    ax.yaxis.set_major_locator(MultipleLocator(0.5))
+    ax.yaxis.set_minor_locator(MultipleLocator(0.1))
+
+    ax.grid(which='major', linestyle='-', linewidth=0.8)
+    ax.grid(which='minor', linestyle='--', linewidth=0.3)
+
+    ax.set_ylabel("Volts")
+    ax.set_title("Pin Voltages")
 
 def init_plot():
     plt.ion()
@@ -225,12 +244,16 @@ def init_plot():
     _init_action_plot(fig, ax_actions)
     _init_pin_plot(fig, ax_pin)
 
+    fig.canvas.draw()
+    background = fig.canvas.copy_from_bbox(fig.bbox)
+
     return fig, (ax_data, ax_actions, ax_pin) 
 
 def _update_data_plot():
     for i, buf in enumerate(buffers_data):
         y = [val + i for val in buf]
         lines_data[i].set_data(range(len(y)), y)
+
 
 def _update_action_plot():
     for i, buf in enumerate(buffers_actions):
@@ -239,8 +262,12 @@ def _update_action_plot():
 
 def _update_pin_data_plot():
     for pin in buffers_pin_data.keys():
-        y = [val for val in buffers_pin_data[key]]
-        lines_pins[pin].set_data(range(len(y)), y)
+        # y = list(buffers_pin_data[pin])
+        # lines_pins[pin].set_data(range(len(y)), y)
+
+        buf = buffers_pin_data[pin]
+        lines_pins[pin].set_ydata(buf)
+        lines_pins[pin].set_xdata(X_AXIS[:len(buf)])
 
 def update_plot():
     # for i, buf in enumerate(buffers):
@@ -249,6 +276,9 @@ def update_plot():
     _update_data_plot()
     _update_action_plot()
     _update_pin_data_plot()
+
+    # for line in lines_data + lines_actions + list(lines_pins.values()):
+        # k
 
     plt.draw()  
     plt.pause(0.01)
@@ -262,7 +292,7 @@ def update_actions(action):
         buffers_actions[i].append(bit * GRAPH_AMPLITUDE)
 
 def update_pin_data(pinNum, data):
-    buffers_pin_data[pinData].append(data)
+    buffers_pin_data[pinNum].append(data)
 
 ###################################################################3
 
@@ -273,6 +303,9 @@ def update_pin_data(pinNum, data):
 def shutdown(serialPort):
     serialPort.close()
     plt.close("all")
+
+
+EndException = None
 
 if __name__ == "__main__":
     running = True
@@ -285,18 +318,17 @@ if __name__ == "__main__":
 
     fig.canvas.mpl_connect('close_event', interrupt)
 
-    ser = serial.Serial("/dev/ttyACM0", 9600, timeout=1)
+    ser = serial.Serial("/dev/ttyACM1", 9600, timeout=1)
 
     lastPlot = 0
     
     while running:
         try:
-            readPayload(ser)
+            readPayload(ser, ax)
 
             # Check to see if we need to plot again
             now = time.monotonic()
             if (now - lastPlot >= PLOT_INTERVAL):
-                print("time to plot!")
                 update_plot()
                 lastPlot = now
 
@@ -304,8 +336,11 @@ if __name__ == "__main__":
             print(f"Caught exception {e}")
             print("Exiting now...")
             running = False
+            EndException = e
 
     shutdown(ser)
+
+    raise EndException
 
 
 

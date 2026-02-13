@@ -87,6 +87,19 @@ COMM_STATUS dataMarshall_uint16(struct dataBlob* dataBlob, uint16_t data) {
 	return status;
 }
 
+COMM_STATUS dataMarshall_float(struct dataBlob* dataBlob, float value) {
+    uint8_t* bytes = (uint8_t*)&value;
+
+    for (int i = 0; i < 4; i++) {
+        COMM_STATUS status = dataMarshall_uint8(dataBlob, bytes[i]);
+        if (status != COMM_STATUS_OK) {
+            return status;
+        }
+    }
+
+    return COMM_STATUS_OK;
+}
+
 COMM_STATUS sendMarshalledData(struct dataBlob* dataBlob) {
 	Serial.write(dataBlob->header);
 
@@ -108,11 +121,11 @@ uint8_t marshallLightData(detectionDataStruct* data) {
 	return outData;
 }
 
-COMM_STATUS sendPinData(uint8_t pin, uint16_t data) {
+COMM_STATUS sendPinData(uint8_t pin, float data) {
 	struct dataBlob* dataBlob = newPinDataBlob();
 
 	dataMarshall_uint8(dataBlob, pin);
-	dataMarshall_uint16(dataBlob, data);
+	dataMarshall_float(dataBlob, data);
 
 	sendMarshalledData(dataBlob);
 
