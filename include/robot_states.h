@@ -15,7 +15,7 @@
  *
  * @author	Wesley Campbell
  * @date	2026-01-15
- * @version v1.0.1
+ * @version v1.0.3
  **/
 
 #ifndef __ROBOT_STATES_H__
@@ -46,6 +46,7 @@
 #define SERVO_MOVE_DOWN   0x10
 #define SERVO_MOVE_UP_DOWN  (SERVO_MOVE_UP | SERVO_MOVE_DOWN)
 
+enum BATTERY_LEVEL {BATTERY_DEAD, BATTERY_LOW, BATTERY_MED, BATTERY_HIGH};
 
 // ========================== STATE TRACKING VARIABLES ===============================
 
@@ -109,6 +110,13 @@ void RobotDetection();
 float readPinVoltage(uint8_t pin);
 
 /**
+ * @brief	Reads the pin connected to the battery and determines the its voltage.
+ * 
+ * Sets a global flag.
+ */
+void readBatteryVoltage();
+
+/**
  * @brief	Checks to see if a given button is pressed.
  *
  * @param uint8_t button_pin : the pin of the button to be read
@@ -166,6 +174,11 @@ void fsmSteerRobot();
 void fsmServoMovement();
 
 /**
+ * @brief	State machine for managing battery indicator LEDS. If the battery is high, will set the flag to enable all three LEDS. If it is dead, the flag to turn off all three leds will be set.
+ */
+void fsmBatteryVoltage();
+
+/**
  * @brief	State machine for managing the capacitive sensor control
  */
 void fsmCapacitiveSensorSpeedControl();
@@ -185,6 +198,11 @@ void fsmChangeSpeed();
  * undertake the cooresponding actions.
  */
 void RobotAction();
+
+/**
+ * Sends meaningful data over the wire for debugging purposes.
+ */
+void debugRobotState();
 
 /**
  * @brief	Handles collision execution logic
@@ -210,6 +228,11 @@ void handleCollisionAction();
  * Will move the servo motor up or down, based upon the condition flags set.
  */
 void handleServoAction();
+
+/**
+ * @brief	Updates the battery LEDS to indicate charge level.
+ */
+void handleBatteryLEDAction();
 
 /**
  * @brief	Will control the motors to drive in desired direction

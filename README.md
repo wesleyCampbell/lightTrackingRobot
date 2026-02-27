@@ -4,7 +4,7 @@
 
 - Author: Wesley Campbell
 - Date: 2026-01-16
-- Version: v1.0.2
+- Version: v1.0.3
 
 ---
 
@@ -53,4 +53,9 @@ A circuit diagram will be provided below further along the development cycle.
 ##### (2026-01-29) -- v1.0.2:
 - Implemented basic serial communication protocol for transmitting data over the wire.
 - Wrote basic python script to read data sent over the serial port and present it in a graphical format.
+
+##### (2026-02-26) -- v1.0.3:
+- Implemented battery voltage sensor
+- Implemented State machine to light up LEDS based upon battery voltage
+- Added global parameteres that allows toggling debugging via serial and via leds into params.h
 

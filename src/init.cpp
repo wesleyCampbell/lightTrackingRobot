@@ -8,10 +8,11 @@
  *
  * @author 	Wesley Campbell
  * @date 	2026-01-16
- * @version	v1.0.1
+ * @version	v1.0.2
  */
 
 #include "init.h"
+#include "Arduino.h"
 
 void initPins() {
 	// Input pins
@@ -20,12 +21,20 @@ void initPins() {
 	pinMode(BUTTON_MOTOR_LEFT, INPUT);
 	pinMode(BUTTON_MOTOR_RIGHT, INPUT);
 	pinMode(BUTTON_COLLISION, INPUT);
+	pinMode(BATTERY_PIN, INPUT);
 	
 	// Output pins
 	pinMode(LED_SERVO_UP, OUTPUT);
 	pinMode(LED_SERVO_DOWN, OUTPUT);
+
+	#ifdef LED_DEBUG_MODE
 	pinMode(LED_MOTOR_LEFT, OUTPUT);
 	pinMode(LED_MOTOR_RIGHT, OUTPUT);
+	#else
+	pinMode(MOTOR_LEFT, OUTPUT);
+	pinMode(MOTOR_RIGHT, OUTPUT);
+
+	#endif
 	pinMode(LED_COLLISION, OUTPUT);
 	pinMode(LED_BUILTIN, OUTPUT);
 }

@@ -10,7 +10,7 @@
  *
  * @author	Wesley Campbell
  * @date	2026-01-15	
- * @version	v1.0.1
+ * @version	v1.0.2
  **/
 
 //======================== PIN DECLARATIONS ===============================
@@ -18,22 +18,37 @@
 #ifndef __PARAMS_H__
 #define __PARAMS_H__
 
+// #define DEBUG_MODE true
+
 // Button input pins
-#define BUTTON_SERVO_UP    A2
-#define BUTTON_SERVO_DOWN  A5
-#define BUTTON_MOTOR_LEFT  A3
-#define BUTTON_MOTOR_RIGHT A6
-#define BUTTON_COLLISION   A4
+#define BUTTON_SERVO_UP    A3
+#define BUTTON_SERVO_DOWN  A7
+#define BUTTON_MOTOR_LEFT  A6
+#define BUTTON_MOTOR_RIGHT A4
+#define BUTTON_COLLISION   A5
 
 // LED output pins
-#define LED_SERVO_UP	6
-#define LED_SERVO_DOWN	5
-#define LED_MOTOR_LEFT	2
-#define LED_MOTOR_RIGHT	4
-#define LED_COLLISION	3
+#define LED_SERVO_UP	2
+#define LED_SERVO_DOWN	6
+#define LED_MOTOR_LEFT	0
+#define LED_MOTOR_RIGHT	0
+#define LED_COLLISION	4
+
+#define LED_BATT_LOW 7
+#define LED_BATT_MED 9
+#define LED_BATT_HIGH 11
+
+// Uncomment line to enable LED Debug mode, where the motors are represented
+// by LED lights on different pins instead.
+
+// #define LED_DEBUG_MODE true
 
 // Motor output pins
-// TODO: implement motors
+#define MOTOR_LEFT 5
+#define MOTOR_RIGHT 3
+
+// Battery Voltage Sensor Pin
+#define BATTERY_PIN A2
 
 // Photodiode input pins
 // TODO: implement this
@@ -55,4 +70,7 @@
 #define VOLTAGE_MAX 5
 #define SENSOR_MAX_OUT 1024
 
+#define BATTERY_MAX_VOLTAGE 9 
+#define BATTERY_SCALED_MAX_VOLTAGE 3.877 
+#define BATTERY_MAX_SCALED_READING (BATTERY_SCALED_MAX_VOLTAGE * SENSOR_MAX_OUT / VOLTAGE_MAX);
 #endif  // __PARAMS_H__

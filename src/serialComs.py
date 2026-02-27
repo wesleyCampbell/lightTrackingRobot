@@ -110,6 +110,7 @@ def read_packet(serialPort):
         if header in HEADERS.keys():
             break
 
+    print("Header ", header, ", recieved")
     packet_size = HEADERS[header]
     payload = serialPort.read(packet_size)
 
@@ -318,7 +319,7 @@ if __name__ == "__main__":
 
     fig.canvas.mpl_connect('close_event', interrupt)
 
-    ser = serial.Serial("/dev/ttyACM1", 9600, timeout=1)
+    ser = serial.Serial("/dev/ttyACM0", 9600, timeout=1)
 
     lastPlot = 0
     
@@ -329,6 +330,7 @@ if __name__ == "__main__":
             # Check to see if we need to plot again
             now = time.monotonic()
             if (now - lastPlot >= PLOT_INTERVAL):
+                print("Plotting...")
                 update_plot()
                 lastPlot = now
 

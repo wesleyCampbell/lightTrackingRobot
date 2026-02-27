@@ -9,7 +9,7 @@
  *
  * @author 	Wesley Campbell
  * @date 	2026-01-15
- * @version	v1.0.1
+ * @version	v1.0.3
  */
 
 #include "includes.h"
@@ -19,6 +19,10 @@
 detectionDataStruct detectedData;
 
 actionStateStruct actionStates;
+
+uint8_t robotSpeed = 255;
+float batteryVoltage = 0;
+BATTERY_LEVEL batteryVoltageLevel;
 
 // ========================== DETECTION STATE FUNCTIONS =============================
 
@@ -40,6 +44,14 @@ bool collisionDetected() {
 		return true;
 	else
 		return false;
+}
+
+void readBatteryVoltage() {
+	uint16_t voltageReading =  analogRead(BATTERY_PIN); 
+
+	Serial.println(voltageReading);
+
+	batteryVoltage = BATTERY_MAX_VOLTAGE * (float) voltageReading / BATTERY_MAX_SCALED_READING;
 }
 
 void RobotDetection() {
@@ -78,6 +90,9 @@ void RobotDetection() {
 	} else {
 		detectedData.lightDetected.up = DETECTION_FALSE;
 	}
+
+	// Reads the battery voltage
+	readBatteryVoltage();
 }
 
 // =========================== PLANNING STATE FUNCTIONS ===============================
@@ -142,10 +157,25 @@ void fsmServoMovement() {
 	}
 }
 
+void fsmBatteryVoltage() {
+	if (batteryVoltage >= 8.1) {
+		batteryVoltageLevel = BATTERY_HIGH;
+	} 
+	else if (batteryVoltage >= 7.2) {
+		batteryVoltageLevel = BATTERY_MED;
+	}
+	else if (batteryVoltage >= 6.3) {
+		batteryVoltageLevel = BATTERY_LOW;
+	} else {
+		batteryVoltageLevel = BATTERY_DEAD; 
+	}
+}
+
 void RobotPlanning() {
 	fsmCollisionDetection();
 	fsmTempLightDetection();
 	fsmServoMovement();
+	fsmBatteryVoltage();
 }
 
 // ================================ ACTION STATE FUNCTIONS ======================================
@@ -158,27 +188,52 @@ void RobotAction() {
 
 	handleServoAction();
 
-	printRobotState(&detectedData, &actionStates);
+	handleBatteryLEDAction();
 
-	sendPinData(BUTTON_SERVO_DOWN, readPinVoltage(BUTTON_SERVO_DOWN));
-	sendPinData(BUTTON_SERVO_UP, readPinVoltage(BUTTON_SERVO_UP));
-	// sendPinData(BUTTON_MOTOR_LEFT, readPinVoltage(BUTTON_MOTOR_LEFT));
-	// sendPinData(BUTTON_MOTOR_RIGHT, readPinVoltage(BUTTON_MOTOR_RIGHT));
-	sendPinData(BUTTON_COLLISION, readPinVoltage(BUTTON_COLLISION));
+	
+#ifdef DEBUG_MODE
+	debugRobotState();
+#endif
 }	
 
+void debugRobotState() {
+	// printRobotState(&detectedData, &actionStates);
+
+	// sendPinData(BUTTON_SERVO_DOWN, readPinVoltage(BUTTON_SERVO_DOWN));
+	// sendPinData(BUTTON_SERVO_UP, readPinVoltage(BUTTON_SERVO_UP));
+	// sendPinData(BUTTON_COLLISION, readPinVoltage(BUTTON_COLLISION));
+	
+	Serial.print("Battery voltage: ");
+	Serial.println(batteryVoltage);
+}
+
 void handleDriveAction() {
+	int pin;
+	#ifdef LED_DEBUG_MODE
+	pin = LED_MOTOR_LEFT;
+	#else
+	pin = MOTOR_LEFT;
+	#endif
+
 	// If DRIVE_LEFT flag set, drive left
 	if (actionStates.Drive & DRIVE_LEFT) {
-		activateLED(LED_MOTOR_LEFT);
+		analogWrite(pin, robotSpeed);
 	} else {
-		disableLED(LED_MOTOR_LEFT);
+		analogWrite(pin, 0);
 	}
+	
+	#ifdef LED_DEBUG_MODE
+	pin = LED_MOTOR_RIGHT;
+	#else
+	pin = MOTOR_RIGHT;
+	#endif
+
 	// If DRIVE_RIGHT flag set, drive right
 	if (actionStates.Drive & DRIVE_RIGHT) {
-		activateLED(LED_MOTOR_RIGHT);
+		analogWrite(pin, robotSpeed);
+
 	} else {
-		disableLED(LED_MOTOR_RIGHT);
+		analogWrite(pin, 0);
 	}
 }
 
@@ -209,6 +264,26 @@ void handleServoAction() {
 	} else {
 		disableLED(LED_SERVO_UP);
 	}
+}
+
+void handleBatteryLEDAction() {
+	int pinValues[] = {LOW, LOW, LOW};
+
+	switch (batteryVoltageLevel) {
+		case BATTERY_DEAD:
+			break;
+		case BATTERY_HIGH:
+			pinValues[2] = HIGH;  // fall through
+		case BATTERY_MED:  
+			pinValues[1] = HIGH;  // fall through
+		case BATTERY_LOW:
+			pinValues[0] = HIGH;
+			break;
+	}
+
+	digitalWrite(LED_BATT_LOW, pinValues[0]);
+	digitalWrite(LED_BATT_MED, pinValues[1]);
+	digitalWrite(LED_BATT_HIGH, pinValues[2]);
 }
 
 void activateLED(uint8_t ledPin) {
