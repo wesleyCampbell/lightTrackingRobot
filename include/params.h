@@ -67,7 +67,7 @@
 // The voltage threshold at which a button is pressed
 #define BUTTON_VTHRESHOLD 3.5 
 
-#define VOLTAGE_MAX 5
+#define VOLTAGE_MAX 5.10
 #define SENSOR_MAX_OUT 1024
 
 #define BATTERY_MAX_VOLTAGE 9 
