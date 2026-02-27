@@ -57,7 +57,6 @@ def batteryCapacity(df_time_column, df_power_column):
 def graph_data_frame(df):
     x = data_file_columns[0]
 
-
     fig, ax = plt.subplots()
 
     for col in df.columns:
@@ -66,6 +65,24 @@ def graph_data_frame(df):
 
     plt.xlabel(x)
     ax.yaxis.set_major_locator(ticker.MultipleLocator(0.5))
+
+    ax.grid(True)
+
+    plt.legend()
+    plt.show()
+
+def graph_power_over_voltage(df):
+    x = data_file_columns[1]
+
+    fig, ax = plt.subplots()
+
+    for col in df.columns:
+        if col not in data_file_columns:
+            ax.plot(df[x], df[col], label=col, marker='.')
+
+    plt.xlabel(x)
+    plt.ylabel("Power (W)")
+    ax.yaxis.set_major_locator(ticker.MultipleLocator(0.05))
 
     ax.grid(True)
 
@@ -94,4 +111,5 @@ if __name__ == "__main__":
         save_data(df, filename)
 
     print("Graphing data...")
-    graph_data_frame(df)
+    # graph_data_frame(df)
+    graph_power_over_voltage(df)

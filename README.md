@@ -59,3 +59,6 @@ A circuit diagram will be provided below further along the development cycle.
 - Implemented State machine to light up LEDS based upon battery voltage
 - Added global parameteres that allows toggling debugging via serial and via leds into params.h
 
+##### (2026-02-26) -- v1.0.3.1:
+- Added python script that allows for battery power analysis
+- New directory for data storage
