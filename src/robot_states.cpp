@@ -9,9 +9,10 @@
  *
  * @author 	Wesley Campbell
  * @date 	2026-01-15
- * @version	v1.0.3
+ * @version	v1.0.4
  */
 
+#include "capacitive_touch.h"
 #include "includes.h"
 #include "params.h"
 #include "robot_states.h"
@@ -20,9 +21,12 @@ detectionDataStruct detectedData;
 
 actionStateStruct actionStates;
 
-uint8_t robotSpeed = 255;
 float batteryVoltage = 0;
 BATTERY_LEVEL batteryVoltageLevel;
+
+int capacitiveTouchDetected = DETECTION_FALSE;
+CAP_STATE capState = CAP_WAITING;
+ROBOT_SPEED robotSpeed = SLOW;
 
 // ========================== DETECTION STATE FUNCTIONS =============================
 
@@ -91,8 +95,16 @@ void RobotDetection() {
 		detectedData.lightDetected.up = DETECTION_FALSE;
 	}
 
+#ifdef BATTERY_MODE_ENABLED
 	// Reads the battery voltage
 	readBatteryVoltage();
+#endif
+
+	if (detectCapTouch()) {
+		capacitiveTouchDetected = DETECTION_TRUE;
+	} else {
+		capacitiveTouchDetected = DETECTION_FALSE;
+	}
 }
 
 // =========================== PLANNING STATE FUNCTIONS ===============================
@@ -171,11 +183,30 @@ void fsmBatteryVoltage() {
 	}
 }
 
+void fsmCapacitiveTouch() {
+	switch (capacitiveTouchDetected) {
+		case DETECTION_FALSE:
+			// If there is no capacitive touch, we only need to do something if
+			// it was just released
+			if (capState == CAP_PRESSED)
+				capState = CAP_RELEASED;
+			break;
+		case DETECTION_TRUE:
+			// If the capacitive touch is detected, we want to wait till it is released
+			if (capState == CAP_WAITING)
+				capState = CAP_PRESSED;
+			break;
+	}
+}
+
 void RobotPlanning() {
 	fsmCollisionDetection();
 	fsmTempLightDetection();
 	fsmServoMovement();
+#ifdef BATTERY_MODE_ENABLED
 	fsmBatteryVoltage();
+#endif
+	fsmCapacitiveTouch();
 }
 
 // ================================ ACTION STATE FUNCTIONS ======================================
@@ -188,7 +219,11 @@ void RobotAction() {
 
 	handleServoAction();
 
+#ifdef BATTER_MODE_ENABLED
 	handleBatteryLEDAction();
+#endif
+
+	handleCapacitiveTouchAction();
 
 	
 #ifdef DEBUG_MODE
@@ -230,7 +265,12 @@ void handleDriveAction() {
 
 	// If DRIVE_RIGHT flag set, drive right
 	if (actionStates.Drive & DRIVE_RIGHT) {
-		analogWrite(pin, robotSpeed);
+		int motorBalanceFactor = 0;
+		if (robotSpeed != STOPPED)
+			motorBalanceFactor = RIGHT_MOTOR_BALANCE_FACTOR;
+
+
+		analogWrite(pin, robotSpeed - motorBalanceFactor);
 
 	} else {
 		analogWrite(pin, 0);
@@ -288,6 +328,33 @@ void handleBatteryLEDAction() {
 
 void activateLED(uint8_t ledPin) {
 	digitalWrite(ledPin, HIGH);
+}
+
+void handleCapacitiveTouchAction() {
+	if (capState == CAP_RELEASED) {
+		toggleRobotSpeed();
+		capState = CAP_WAITING;
+	}
+}
+
+void toggleRobotSpeed() {
+	switch (robotSpeed) {
+		case STOPPED:
+			robotSpeed = SLOW;
+			break;
+		case SLOW:
+			robotSpeed = MEDIUM;
+			break;
+		case MEDIUM:
+			robotSpeed = FAST;
+			break;
+		case FAST:
+			robotSpeed = STOPPED;
+			break;
+	}
+
+	Serial.print("robotSpeed: ");
+	Serial.println(robotSpeed);
 }
 
 void disableLED(uint8_t ledPin) {

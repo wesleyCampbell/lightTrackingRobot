@@ -4,7 +4,7 @@
 
 - Author: Wesley Campbell
 - Date: 2026-01-16
-- Version: v1.0.3
+- Version: v1.0.4
 
 ---
 
@@ -62,3 +62,8 @@ A circuit diagram will be provided below further along the development cycle.
 ##### (2026-02-26) -- v1.0.3.1:
 - Added python script that allows for battery power analysis
 - New directory for data storage
+
+##### (2026-03-14) -- v.1.0.4:
+- Added capacitive sensor files that allow for capacitive touch sensors to be placed on the robot
+- Implemented finite state machine for the robot's movement speed
+- When capacitive touch is sensed, on release it will toggle the robot speed to the next value

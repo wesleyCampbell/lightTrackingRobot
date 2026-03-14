@@ -5,7 +5,7 @@
  *
  * @author	Wesley Campbell
  * @date 	2026-01-15
- * @version	v1.0.0
+ * @version	v1.0.1
  */
 
 #ifndef __INCLUDES_H__
@@ -21,5 +21,6 @@
 #include "robot_states.h"
 #include "init.h"
 #include "communicate.h"
+#include "capacitive_touch.h"
 
 #endif  // __INCLUDES_H__

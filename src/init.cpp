@@ -8,11 +8,11 @@
  *
  * @author 	Wesley Campbell
  * @date 	2026-01-16
- * @version	v1.0.2
+ * @version	v1.0.3
  */
 
 #include "init.h"
-#include "Arduino.h"
+#include "capacitive_touch.h"
 
 void initPins() {
 	// Input pins
@@ -37,6 +37,9 @@ void initPins() {
 	#endif
 	pinMode(LED_COLLISION, OUTPUT);
 	pinMode(LED_BUILTIN, OUTPUT);
+
+	pinMode(CAP_OUT_PIN, OUTPUT);
+	pinMode(CAP_IN_PIN, INPUT);
 }
 
 void initSerialComm() {

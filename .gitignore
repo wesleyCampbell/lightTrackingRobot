@@ -1,0 +1,13 @@
+# cscope files
+.cscope/
+.cscope.*
+cscope*
+bin/generate_cscope
+
+# build artifacts
+!build/
+build/*
+.build/
+
+
+

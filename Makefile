@@ -4,7 +4,7 @@
 #
 #	Author: Wesley Campbell
 #	Date: 	2026-01-16
-#	Version: 1.0.2
+#	Version: 1.0.3
 #
 #	Part of the lightTrackingRobot project
 # ---------------------------------------------------------
@@ -33,7 +33,7 @@ ARDUINO = arduino-cli
 
 all: $(TARGET)
 
-$(TARGET): $(SRC_FILES) 
+$(TARGET): $(SRC_FILES) $(INC_DIR) 
 	@echo "Beginning compile process..."
 	@mkdir -p $(BUILD_DIR)
 	$(ARDUINO) compile \

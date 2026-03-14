@@ -15,7 +15,7 @@
  *
  * @author	Wesley Campbell
  * @date	2026-01-15
- * @version v1.0.3
+ * @version v1.0.4
  **/
 
 #ifndef __ROBOT_STATES_H__
@@ -47,6 +47,11 @@
 #define SERVO_MOVE_UP_DOWN  (SERVO_MOVE_UP | SERVO_MOVE_DOWN)
 
 enum BATTERY_LEVEL {BATTERY_DEAD, BATTERY_LOW, BATTERY_MED, BATTERY_HIGH};
+
+enum ROBOT_SPEED {STOPPED=0, SLOW=(int)(0.45*255), MEDIUM=(int)(0.75*255), FAST=255};
+
+// I notice the right motor pulls more with the same PWM 
+#define RIGHT_MOTOR_BALANCE_FACTOR 20 
 
 // ========================== STATE TRACKING VARIABLES ===============================
 
@@ -181,12 +186,7 @@ void fsmBatteryVoltage();
 /**
  * @brief	State machine for managing the capacitive sensor control
  */
-void fsmCapacitiveSensorSpeedControl();
-
-/**
- * @brief	State machine for changing the current speed.
- */
-void fsmChangeSpeed();
+void fsmCapacitiveTouch();
 
 
 // ============================= ACTION STATE FUNCTIONS ======================================
@@ -239,6 +239,16 @@ void handleBatteryLEDAction();
  *
  */
 void driveControl();
+
+/**
+ * @brief 	Will toggle the motor speed to the next option
+ */
+void toggleRobotSpeed();
+
+/**
+ * @brief Will trigger the toggle-speed option
+ */
+void handleCapacitiveTouchAction();
 
 /**
  * @brief	Toggles LED lights
