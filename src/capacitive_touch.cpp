@@ -20,11 +20,6 @@ long computeTau() {
 bool detectCapTouch() {
 	long tau = computeTau();
 
-#ifdef DEBUG_TAU
-	Serial.print("tau: ");
-	Serial.println(tau);
-#endif
-
 	if (tau > CAP_SENSOR_TAU_THRESHOLD) 
 		return true;
 	return false;

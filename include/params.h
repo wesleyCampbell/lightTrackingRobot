@@ -21,40 +21,27 @@
 // #define DEBUG_MODE true
 
 // Button input pins
-#define BUTTON_SERVO_UP    A3
-#define BUTTON_SERVO_DOWN  A7
-#define BUTTON_MOTOR_LEFT  A6
-#define BUTTON_MOTOR_RIGHT A4
-#define BUTTON_COLLISION   A5
+#define BUTTON_COLLISION   A6
 
 // LED output pins
 #define LED_SERVO_UP	2
 #define LED_SERVO_DOWN	6
-#define LED_MOTOR_LEFT	0
-#define LED_MOTOR_RIGHT	0
 #define LED_COLLISION	4
-
-#define LED_BATT_LOW 7
-#define LED_BATT_MED 9
-#define LED_BATT_HIGH 11
-
-// Uncomment line to enable LED Debug mode, where the motors are represented
-// by LED lights on different pins instead.
-
-// #define LED_DEBUG_MODE true
 
 // Motor output pins
 #define MOTOR_LEFT 5
 #define MOTOR_RIGHT 3
 
-// Battery Voltage Sensor Pin
-#define BATTERY_PIN A2
+#define MOTOR_LEFT_FORWARD 10
+#define MOTOR_LEFT_REVERSE 8
+#define MOTOR_RIGHT_FORWARD 12
+#define MOTOR_RIGHT_REVERSE 11
 
 // Photodiode input pins
-// TODO: implement this
-
-// Capacitive input pins
-// TODO: implement this
+#define PHOTODIODE_TOP_LEFT A0
+#define PHOTODIODE_BOTTOM_LEFT A1
+#define PHOTODIODE_BOTTOM_RIGHT A2
+#define PHOTODIODE_TOP_RIGHT A3
 
 // Ultrasonic input pin
 // TODO: implement this
@@ -70,7 +57,4 @@
 #define VOLTAGE_MAX 5.10
 #define SENSOR_MAX_OUT 1024
 
-#define BATTERY_MAX_VOLTAGE 9 
-#define BATTERY_SCALED_MAX_VOLTAGE 3.877 
-#define BATTERY_MAX_SCALED_READING (BATTERY_SCALED_MAX_VOLTAGE * SENSOR_MAX_OUT / VOLTAGE_MAX);
 #endif  // __PARAMS_H__

@@ -14,6 +14,7 @@
 
 #include "capacitive_touch.h"
 #include "includes.h"
+#include "lightDirection.h"
 #include "params.h"
 #include "robot_states.h"
 
@@ -50,12 +51,29 @@ bool collisionDetected() {
 		return false;
 }
 
-void readBatteryVoltage() {
-	uint16_t voltageReading =  analogRead(BATTERY_PIN); 
+void checkLight() {
+	LIGHT_DIR lightDir = detectLightDirection();
 
-	Serial.println(voltageReading);
+	if (lightDir & LIGHT_DOWN)
+		detectedData.lightDetected.down = DETECTION_TRUE;
+	else
+		detectedData.lightDetected.down = DETECTION_FALSE;
 
-	batteryVoltage = BATTERY_MAX_VOLTAGE * (float) voltageReading / BATTERY_MAX_SCALED_READING;
+	if (lightDir & LIGHT_UP)
+		detectedData.lightDetected.up = DETECTION_TRUE;
+	else
+		detectedData.lightDetected.up = DETECTION_FALSE;
+
+	if (lightDir & LIGHT_LEFT)
+		detectedData.lightDetected.left = DETECTION_TRUE;
+	else
+		detectedData.lightDetected.left = DETECTION_FALSE;
+
+	if (lightDir & LIGHT_RIGHT)
+		detectedData.lightDetected.right = DETECTION_TRUE;
+	else
+		detectedData.lightDetected.right = DETECTION_FALSE;
+
 }
 
 void RobotDetection() {
@@ -66,39 +84,7 @@ void RobotDetection() {
 		detectedData.collisionDetected = DETECTION_FALSE;
 	}
 
-	// Left light detection
-	if (buttonPushed(BUTTON_MOTOR_LEFT)) {
-		detectedData.lightDetected.left = DETECTION_TRUE;
-	} else {
-		detectedData.lightDetected.left = DETECTION_FALSE;
-	}
-	
-	// Right light detection
-	if (buttonPushed(BUTTON_MOTOR_RIGHT)) {
-		detectedData.lightDetected.right = DETECTION_TRUE;
-	} else {
-		detectedData.lightDetected.right = DETECTION_FALSE;
-	}
-
-
-	// Light down detection
-	if (buttonPushed(BUTTON_SERVO_DOWN)) {
-		detectedData.lightDetected.down = DETECTION_TRUE;
-	} else {
-		detectedData.lightDetected.down = DETECTION_FALSE;
-	}
-	
-	// Light up detection
-	if (buttonPushed(BUTTON_SERVO_UP)) {
-		detectedData.lightDetected.up = DETECTION_TRUE;
-	} else {
-		detectedData.lightDetected.up = DETECTION_FALSE;
-	}
-
-#ifdef BATTERY_MODE_ENABLED
-	// Reads the battery voltage
-	readBatteryVoltage();
-#endif
+	checkLight();
 
 	if (detectCapTouch()) {
 		capacitiveTouchDetected = DETECTION_TRUE;
@@ -203,9 +189,6 @@ void RobotPlanning() {
 	fsmCollisionDetection();
 	fsmTempLightDetection();
 	fsmServoMovement();
-#ifdef BATTERY_MODE_ENABLED
-	fsmBatteryVoltage();
-#endif
 	fsmCapacitiveTouch();
 }
 
@@ -219,61 +202,69 @@ void RobotAction() {
 
 	handleServoAction();
 
-#ifdef BATTER_MODE_ENABLED
-	handleBatteryLEDAction();
-#endif
-
 	handleCapacitiveTouchAction();
-
-	
-#ifdef DEBUG_MODE
-	debugRobotState();
-#endif
 }	
 
-void debugRobotState() {
-	// printRobotState(&detectedData, &actionStates);
+void enableRightForward() {
+	digitalWrite(MOTOR_RIGHT_REVERSE, LOW);
+	digitalWrite(MOTOR_RIGHT_FORWARD, HIGH);
+}	
 
-	// sendPinData(BUTTON_SERVO_DOWN, readPinVoltage(BUTTON_SERVO_DOWN));
-	// sendPinData(BUTTON_SERVO_UP, readPinVoltage(BUTTON_SERVO_UP));
-	// sendPinData(BUTTON_COLLISION, readPinVoltage(BUTTON_COLLISION));
-	
-	Serial.print("Battery voltage: ");
-	Serial.println(batteryVoltage);
+void enableRightReverse() {
+	digitalWrite(MOTOR_RIGHT_FORWARD, LOW);
+	digitalWrite(MOTOR_RIGHT_REVERSE, HIGH);
+}	
+
+void enableLeftForward() {
+	digitalWrite(MOTOR_LEFT_REVERSE, LOW);
+	digitalWrite(MOTOR_LEFT_FORWARD, HIGH);
+}	
+
+void enableLeftReverse() {
+	digitalWrite(MOTOR_LEFT_FORWARD, LOW);
+	digitalWrite(MOTOR_LEFT_REVERSE, HIGH);
+}	
+
+void enableMotors() {
+	analogWrite(MOTOR_LEFT, robotSpeed);
+	analogWrite(MOTOR_RIGHT, robotSpeed);
+}
+
+void disableMotors() {
+	analogWrite(MOTOR_LEFT, LOW);
+	analogWrite(MOTOR_RIGHT, LOW);
+}
+
+void turnLeft() {
+	enableLeftForward();
+	enableRightReverse();
+	enableMotors();	
+}
+
+void turnRight() {
+	enableRightForward();
+	enableLeftReverse();
+	enableMotors();
+}
+
+void driveStraight() {
+	enableRightReverse();
+	enableLeftReverse();
+	enableMotors();
 }
 
 void handleDriveAction() {
-	int pin;
-	#ifdef LED_DEBUG_MODE
-	pin = LED_MOTOR_LEFT;
-	#else
-	pin = MOTOR_LEFT;
-	#endif
-
-	// If DRIVE_LEFT flag set, drive left
-	if (actionStates.Drive & DRIVE_LEFT) {
-		analogWrite(pin, robotSpeed);
+	if ((actionStates.Drive & (DRIVE_LEFT | DRIVE_RIGHT)) == (DRIVE_LEFT | DRIVE_RIGHT)) {
+		driveStraight();
+		Serial.println("DRIVING STRAIGHT");
+	} else if (actionStates.Drive & DRIVE_LEFT) {
+		turnLeft();
+		Serial.println("TURNING LEFT");
+	} else if (actionStates.Drive & DRIVE_RIGHT) {
+		turnRight();
+		Serial.println("TURNING RIGHT");
 	} else {
-		analogWrite(pin, 0);
-	}
-	
-	#ifdef LED_DEBUG_MODE
-	pin = LED_MOTOR_RIGHT;
-	#else
-	pin = MOTOR_RIGHT;
-	#endif
-
-	// If DRIVE_RIGHT flag set, drive right
-	if (actionStates.Drive & DRIVE_RIGHT) {
-		int motorBalanceFactor = 0;
-		if (robotSpeed != STOPPED)
-			motorBalanceFactor = RIGHT_MOTOR_BALANCE_FACTOR;
-
-
-		analogWrite(pin, robotSpeed - motorBalanceFactor);
-
-	} else {
-		analogWrite(pin, 0);
+		disableMotors();
 	}
 }
 
@@ -293,6 +284,9 @@ void handleCollisionAction() {
 
 void handleServoAction() {
 	// If SERVO_MOVE_DOWN flag set, move servo down
+	Serial.print("Servo Move Down: ");
+	Serial.println(actionStates.Servo & SERVO_MOVE_DOWN);
+
 	if (actionStates.Servo & SERVO_MOVE_DOWN) {
 		activateLED(LED_SERVO_DOWN);
 	} else {
@@ -304,26 +298,6 @@ void handleServoAction() {
 	} else {
 		disableLED(LED_SERVO_UP);
 	}
-}
-
-void handleBatteryLEDAction() {
-	int pinValues[] = {LOW, LOW, LOW};
-
-	switch (batteryVoltageLevel) {
-		case BATTERY_DEAD:
-			break;
-		case BATTERY_HIGH:
-			pinValues[2] = HIGH;  // fall through
-		case BATTERY_MED:  
-			pinValues[1] = HIGH;  // fall through
-		case BATTERY_LOW:
-			pinValues[0] = HIGH;
-			break;
-	}
-
-	digitalWrite(LED_BATT_LOW, pinValues[0]);
-	digitalWrite(LED_BATT_MED, pinValues[1]);
-	digitalWrite(LED_BATT_HIGH, pinValues[2]);
 }
 
 void activateLED(uint8_t ledPin) {
@@ -352,9 +326,6 @@ void toggleRobotSpeed() {
 			robotSpeed = STOPPED;
 			break;
 	}
-
-	Serial.print("robotSpeed: ");
-	Serial.println(robotSpeed);
 }
 
 void disableLED(uint8_t ledPin) {

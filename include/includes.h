@@ -22,5 +22,6 @@
 #include "init.h"
 #include "communicate.h"
 #include "capacitive_touch.h"
+#include "lightDirection.h"
 
 #endif  // __INCLUDES_H__

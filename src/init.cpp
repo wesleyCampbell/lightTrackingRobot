@@ -13,33 +13,33 @@
 
 #include "init.h"
 #include "capacitive_touch.h"
+#include "params.h"
 
 void initPins() {
 	// Input pins
-	pinMode(BUTTON_SERVO_UP, INPUT);
-	pinMode(BUTTON_SERVO_DOWN, INPUT);
-	pinMode(BUTTON_MOTOR_LEFT, INPUT);
-	pinMode(BUTTON_MOTOR_RIGHT, INPUT);
 	pinMode(BUTTON_COLLISION, INPUT);
-	pinMode(BATTERY_PIN, INPUT);
 	
 	// Output pins
 	pinMode(LED_SERVO_UP, OUTPUT);
 	pinMode(LED_SERVO_DOWN, OUTPUT);
 
-	#ifdef LED_DEBUG_MODE
-	pinMode(LED_MOTOR_LEFT, OUTPUT);
-	pinMode(LED_MOTOR_RIGHT, OUTPUT);
-	#else
 	pinMode(MOTOR_LEFT, OUTPUT);
 	pinMode(MOTOR_RIGHT, OUTPUT);
+	pinMode(MOTOR_LEFT_FORWARD, OUTPUT);
+	pinMode(MOTOR_LEFT_REVERSE, OUTPUT);
+	pinMode(MOTOR_RIGHT_FORWARD, OUTPUT);
+	pinMode(MOTOR_RIGHT_REVERSE, OUTPUT);
 
-	#endif
 	pinMode(LED_COLLISION, OUTPUT);
 	pinMode(LED_BUILTIN, OUTPUT);
 
 	pinMode(CAP_OUT_PIN, OUTPUT);
 	pinMode(CAP_IN_PIN, INPUT);
+
+	pinMode(PHOTODIODE_TOP_LEFT, INPUT);
+	pinMode(PHOTODIODE_BOTTOM_LEFT, INPUT);
+	pinMode(PHOTODIODE_BOTTOM_RIGHT, INPUT);
+	pinMode(PHOTODIODE_TOP_RIGHT, INPUT);
 }
 
 void initSerialComm() {
