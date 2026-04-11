@@ -11,7 +11,7 @@
 
 # Board Configuration
 BOARD_FQBN = arduino:avr:nano:cpu=atmega328old
-PORT       = /dev/ttyACM0
+PORT       = /dev/ttyACM1
 # PORT       = $(shell arduino-cli board list | grep -Eo '/dev/\w*')
 
 # Filetree Configuration

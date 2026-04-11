@@ -12,6 +12,7 @@
  * @version	v1.0.4
  */
 
+#include "Arduino.h"
 #include "capacitive_touch.h"
 #include "includes.h"
 #include "lightDirection.h"
@@ -28,6 +29,9 @@ BATTERY_LEVEL batteryVoltageLevel;
 int capacitiveTouchDetected = DETECTION_FALSE;
 CAP_STATE capState = CAP_WAITING;
 ROBOT_SPEED robotSpeed = SLOW;
+
+extern Servo servo;
+extern int servoAngle;
 
 // ========================== DETECTION STATE FUNCTIONS =============================
 
@@ -53,6 +57,8 @@ bool collisionDetected() {
 
 void checkLight() {
 	LIGHT_DIR lightDir = detectLightDirection();
+
+	Serial.println(servo.read());
 
 	if (lightDir & LIGHT_DOWN)
 		detectedData.lightDetected.down = DETECTION_TRUE;
@@ -205,26 +211,6 @@ void RobotAction() {
 	handleCapacitiveTouchAction();
 }	
 
-void enableRightForward() {
-	digitalWrite(MOTOR_RIGHT_REVERSE, LOW);
-	digitalWrite(MOTOR_RIGHT_FORWARD, HIGH);
-}	
-
-void enableRightReverse() {
-	digitalWrite(MOTOR_RIGHT_FORWARD, LOW);
-	digitalWrite(MOTOR_RIGHT_REVERSE, HIGH);
-}	
-
-void enableLeftForward() {
-	digitalWrite(MOTOR_LEFT_REVERSE, LOW);
-	digitalWrite(MOTOR_LEFT_FORWARD, HIGH);
-}	
-
-void enableLeftReverse() {
-	digitalWrite(MOTOR_LEFT_FORWARD, LOW);
-	digitalWrite(MOTOR_LEFT_REVERSE, HIGH);
-}	
-
 void enableMotors() {
 	analogWrite(MOTOR_LEFT, robotSpeed);
 	analogWrite(MOTOR_RIGHT, robotSpeed);
@@ -236,33 +222,24 @@ void disableMotors() {
 }
 
 void turnLeft() {
-	enableLeftForward();
-	enableRightReverse();
-	enableMotors();	
+	analogWrite(MOTOR_RIGHT, robotSpeed);
 }
 
 void turnRight() {
-	enableRightForward();
-	enableLeftReverse();
-	enableMotors();
+	analogWrite(MOTOR_LEFT, robotSpeed);
 }
 
 void driveStraight() {
-	enableRightReverse();
-	enableLeftReverse();
 	enableMotors();
 }
 
 void handleDriveAction() {
 	if ((actionStates.Drive & (DRIVE_LEFT | DRIVE_RIGHT)) == (DRIVE_LEFT | DRIVE_RIGHT)) {
 		driveStraight();
-		Serial.println("DRIVING STRAIGHT");
 	} else if (actionStates.Drive & DRIVE_LEFT) {
 		turnLeft();
-		Serial.println("TURNING LEFT");
 	} else if (actionStates.Drive & DRIVE_RIGHT) {
 		turnRight();
-		Serial.println("TURNING RIGHT");
 	} else {
 		disableMotors();
 	}
@@ -284,19 +261,22 @@ void handleCollisionAction() {
 
 void handleServoAction() {
 	// If SERVO_MOVE_DOWN flag set, move servo down
-	Serial.print("Servo Move Down: ");
-	Serial.println(actionStates.Servo & SERVO_MOVE_DOWN);
-
 	if (actionStates.Servo & SERVO_MOVE_DOWN) {
-		activateLED(LED_SERVO_DOWN);
-	} else {
-		disableLED(LED_SERVO_DOWN);
+		servoAngle -= SERVO_ANGLE_DELTA;
+		if (servoAngle < SERVO_ANGLE_MIN) {
+			servoAngle = SERVO_ANGLE_MIN;
+		}
+		servo.write(servoAngle);
 	}
 	// If SERVO_MOVE_UP flag set, move servo up
 	if (actionStates.Servo & SERVO_MOVE_UP) {
-		activateLED(LED_SERVO_UP);
-	} else {
-		disableLED(LED_SERVO_UP);
+		servoAngle += SERVO_ANGLE_DELTA;
+		
+		if (servoAngle > SERVO_ANGLE_MAX) {
+			servoAngle = SERVO_ANGLE_MAX;
+		}
+
+		servo.write(servoAngle);
 	}
 }
 

@@ -24,8 +24,6 @@
 #define BUTTON_COLLISION   A6
 
 // LED output pins
-#define LED_SERVO_UP	2
-#define LED_SERVO_DOWN	6
 #define LED_COLLISION	4
 
 // Motor output pins
@@ -47,7 +45,11 @@
 // TODO: implement this
 
 // Servo output pin
-// TOOD: implement this
+#define SERVO_PIN 6
+#define SERVO_ANGLE_MIN 95
+#define SERVO_ANGLE_MAX 175
+#define SERVO_ANGLE_START 150 
+#define SERVO_ANGLE_DELTA 2
 
 // ======================= SAMPLING PARAMETERS =============================
 

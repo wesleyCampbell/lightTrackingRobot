@@ -24,4 +24,9 @@ void initPins();
  */
 void initSerialComm();
 
+/**
+ * @brief	Initializes the servo motor
+ */
+void initServo();
+
 #endif  // __INIT_H__

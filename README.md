@@ -4,7 +4,7 @@
 
 - Author: Wesley Campbell
 - Date: 2026-01-16
-- Version: v1.0.4
+- Version: v1.0.6
 
 ---
 
@@ -67,3 +67,11 @@ A circuit diagram will be provided below further along the development cycle.
 - Added capacitive sensor files that allow for capacitive touch sensors to be placed on the robot
 - Implemented finite state machine for the robot's movement speed
 - When capacitive touch is sensed, on release it will toggle the robot speed to the next value
+
+##### (2026-04-11) -- v.1.0.5:
+- Added photodiode array to determine light direction
+- Connected photodiode array to motors and LEDS
+
+##### (2026-04-11) -- v.1.0.6:
+- Added servo motor connected to light up and light down detection
+- Servo motor moves photodiode array up and down to stay aligned with light source

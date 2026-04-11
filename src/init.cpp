@@ -15,13 +15,12 @@
 #include "capacitive_touch.h"
 #include "params.h"
 
+Servo servo;
+int servoAngle;
+
 void initPins() {
 	// Input pins
 	pinMode(BUTTON_COLLISION, INPUT);
-	
-	// Output pins
-	pinMode(LED_SERVO_UP, OUTPUT);
-	pinMode(LED_SERVO_DOWN, OUTPUT);
 
 	pinMode(MOTOR_LEFT, OUTPUT);
 	pinMode(MOTOR_RIGHT, OUTPUT);
@@ -45,4 +44,11 @@ void initPins() {
 void initSerialComm() {
 	// Primary serial port
 	Serial.begin(9600);  
+}
+
+void initServo() {
+	servo.attach(SERVO_PIN);
+	servo.write(SERVO_ANGLE_START);
+
+	servoAngle = SERVO_ANGLE_START;
 }

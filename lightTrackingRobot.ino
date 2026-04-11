@@ -15,6 +15,8 @@ void setup() {
   initPins();
 
   initSerialComm();
+
+  initServo();
 }
 
 void loop() {
