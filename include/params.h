@@ -30,11 +30,6 @@
 #define MOTOR_LEFT 5
 #define MOTOR_RIGHT 3
 
-#define MOTOR_LEFT_FORWARD 10
-#define MOTOR_LEFT_REVERSE 8
-#define MOTOR_RIGHT_FORWARD 12
-#define MOTOR_RIGHT_REVERSE 11
-
 // Photodiode input pins
 #define PHOTODIODE_TOP_LEFT A0
 #define PHOTODIODE_BOTTOM_LEFT A1
@@ -42,7 +37,8 @@
 #define PHOTODIODE_TOP_RIGHT A3
 
 // Ultrasonic input pin
-// TODO: implement this
+#define ULTRASONIC_TRIGGER_PIN 10
+#define ULTRASONIC_ECHO_PIN 8
 
 // Servo output pin
 #define SERVO_PIN 6
@@ -58,5 +54,9 @@
 
 #define VOLTAGE_MAX 5.10
 #define SENSOR_MAX_OUT 1024
+
+// The max distance to consider for the ultrasonic sensor.
+#define ULTRASONIC_MAX_DIST 200
+#define COLLISION_DISTANCE 7
 
 #endif  // __PARAMS_H__

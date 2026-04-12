@@ -14,6 +14,8 @@
 
 #include "includes.h"
 
+extern NewPing sonarSensor;
+
 /**
  * @brief 	Sets the pinMode for all pins used in the robot
  */

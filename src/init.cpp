@@ -18,16 +18,14 @@
 Servo servo;
 int servoAngle;
 
+NewPing sonarSensor(ULTRASONIC_TRIGGER_PIN, ULTRASONIC_ECHO_PIN, ULTRASONIC_MAX_DIST);
+
 void initPins() {
 	// Input pins
 	pinMode(BUTTON_COLLISION, INPUT);
 
 	pinMode(MOTOR_LEFT, OUTPUT);
 	pinMode(MOTOR_RIGHT, OUTPUT);
-	pinMode(MOTOR_LEFT_FORWARD, OUTPUT);
-	pinMode(MOTOR_LEFT_REVERSE, OUTPUT);
-	pinMode(MOTOR_RIGHT_FORWARD, OUTPUT);
-	pinMode(MOTOR_RIGHT_REVERSE, OUTPUT);
 
 	pinMode(LED_COLLISION, OUTPUT);
 	pinMode(LED_BUILTIN, OUTPUT);
@@ -39,6 +37,9 @@ void initPins() {
 	pinMode(PHOTODIODE_BOTTOM_LEFT, INPUT);
 	pinMode(PHOTODIODE_BOTTOM_RIGHT, INPUT);
 	pinMode(PHOTODIODE_TOP_RIGHT, INPUT);
+
+	// pinMode(ULTRASONIC_TRIGGER_PIN, OUTPUT);
+	// pinMode(ULTRASONIC_ECHO_PIN, INPUT);
 }
 
 void initSerialComm() {

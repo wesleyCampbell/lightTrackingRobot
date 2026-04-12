@@ -32,6 +32,7 @@ ROBOT_SPEED robotSpeed = SLOW;
 
 extern Servo servo;
 extern int servoAngle;
+extern NewPing sonarSensor;
 
 // ========================== DETECTION STATE FUNCTIONS =============================
 
@@ -47,18 +48,25 @@ bool buttonPushed(uint8_t button_pin) {
 		return false;
 }
 
-bool collisionDetected() {
-	// Currently, a button press will simulate a collision
-	if (buttonPushed(BUTTON_COLLISION))
-		return true;
-	else
-		return false;
+bool collisionDetected() {	
+	static unsigned long lastPing = 0;
+	static int sonarDistance = 0;
+
+	if (millis() - lastPing > 40) {
+		lastPing = millis();
+		sonarDistance = sonarSensor.ping_cm();  // returns 0 when distance too far
+		Serial.println(sonarDistance);
+	}
+
+	if (sonarDistance != 0) {
+		return sonarDistance <= COLLISION_DISTANCE;	
+	}
+
+	return false;
 }
 
 void checkLight() {
 	LIGHT_DIR lightDir = detectLightDirection();
-
-	Serial.println(servo.read());
 
 	if (lightDir & LIGHT_DOWN)
 		detectedData.lightDetected.down = DETECTION_TRUE;

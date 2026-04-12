@@ -17,6 +17,7 @@
 #include <stdlib.h>
 #include <Arduino.h>
 #include <Servo.h>
+#include <NewPing.h>
 
 #include "params.h"
 #include "robot_states.h"
